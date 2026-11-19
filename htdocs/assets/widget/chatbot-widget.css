@@ -1,0 +1,310 @@
+/* ==========================================================================
+   ChatBot Creator Studio - Embeddable Widget Stylesheet
+   Pure Vanilla CSS - Scoped for Host Isolation
+   ========================================================================== */
+
+:host, .cbc-widget-root {
+    --cbc-primary: #2563eb;
+    --cbc-primary-hover: #1d4ed8;
+    --cbc-bg: #ffffff;
+    --cbc-text: #1e293b;
+    --cbc-text-muted: #64748b;
+    --cbc-border: #e2e8f0;
+    --cbc-msg-bot: #f1f5f9;
+    --cbc-msg-user: #2563eb;
+    --cbc-msg-user-text: #ffffff;
+    --cbc-radius: 16px;
+    --cbc-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    box-sizing: border-box;
+}
+
+.cbc-widget-root * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Launcher Button */
+.cbc-launcher {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--cbc-primary);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    box-shadow: var(--cbc-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s;
+    z-index: 2147483640;
+}
+
+.cbc-launcher:hover {
+    transform: scale(1.06);
+    background-color: var(--cbc-primary-hover);
+}
+
+.cbc-launcher svg {
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+    transition: transform 0.2s;
+}
+
+.cbc-launcher.cbc-left {
+    right: auto;
+    left: 24px;
+}
+
+/* Chat Container Window */
+.cbc-window {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    width: 380px;
+    height: 600px;
+    max-height: calc(100vh - 120px);
+    max-width: calc(100vw - 32px);
+    background: var(--cbc-bg);
+    border-radius: var(--cbc-radius);
+    box-shadow: var(--cbc-shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2147483645;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    border: 1px solid var(--cbc-border);
+}
+
+.cbc-window.cbc-open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.cbc-window.cbc-left {
+    right: auto;
+    left: 24px;
+}
+
+/* Header */
+.cbc-header {
+    background: var(--cbc-primary);
+    color: #ffffff;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cbc-header-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.cbc-header-info p {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+.cbc-close-btn {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s, background 0.2s;
+}
+
+.cbc-close-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* Message Area */
+.cbc-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #f8fafc;
+}
+
+.cbc-msg {
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+
+.cbc-msg-bot {
+    align-self: flex-start;
+    background: #ffffff;
+    color: var(--cbc-text);
+    border: 1px solid var(--cbc-border);
+    border-bottom-left-radius: 4px;
+}
+
+.cbc-msg-user {
+    align-self: flex-end;
+    background: var(--cbc-msg-user);
+    color: var(--cbc-msg-user-text);
+    border-bottom-right-radius: 4px;
+}
+
+/* Suggested Chips */
+.cbc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.cbc-chip {
+    background: #ffffff;
+    color: var(--cbc-primary);
+    border: 1px solid var(--cbc-primary);
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.cbc-chip:hover {
+    background: var(--cbc-primary);
+    color: #ffffff;
+}
+
+/* Typing Indicator */
+.cbc-typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    background: #ffffff;
+    border: 1px solid var(--cbc-border);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    width: fit-content;
+}
+
+.cbc-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--cbc-text-muted);
+    border-radius: 50%;
+    animation: cbcBounce 1.4s infinite ease-in-out;
+}
+
+.cbc-dot:nth-child(1) { animation-delay: -0.32s; }
+.cbc-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes cbcBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+}
+
+/* Footer / Input Area */
+.cbc-footer {
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid var(--cbc-border);
+}
+
+.cbc-input-box {
+    display: flex;
+    align-items: center;
+    background: #f1f5f9;
+    border-radius: 24px;
+    padding: 4px 6px 4px 14px;
+    border: 1px solid transparent;
+    transition: border 0.2s, background 0.2s;
+}
+
+.cbc-input-box:focus-within {
+    border-color: var(--cbc-primary);
+    background: #ffffff;
+}
+
+.cbc-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    outline: none;
+    color: var(--cbc-text);
+}
+
+.cbc-send-btn {
+    background: var(--cbc-primary);
+    border: none;
+    color: #ffffff;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.cbc-send-btn:hover {
+    background: var(--cbc-primary-hover);
+}
+
+.cbc-send-btn:active {
+    transform: scale(0.95);
+}
+
+.cbc-watermark {
+    text-align: center;
+    font-size: 11px;
+    color: var(--cbc-text-muted);
+    margin-top: 6px;
+}
+
+.cbc-watermark a {
+    color: var(--cbc-primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Mobile full drawer */
+@media (max-width: 480px) {
+    .cbc-window {
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 0;
+    }
+}

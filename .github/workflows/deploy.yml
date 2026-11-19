@@ -1,0 +1,136 @@
+name: Deploy ChatBot Creator Studio to Shared Hosting
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  test-and-prepare:
+    name: Test & Prepare Production Artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_mysql, curl, json, openssl, zip, mbstring
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+
+      - name: Generate Production .env from GitHub Secrets
+        run: |
+          cat << 'EOF' > .env
+          APP_NAME="${{ secrets.APP_NAME || 'ChatBot Creator Studio' }}"
+          APP_ENV=production
+          APP_DEBUG=false
+          APP_URL="${{ secrets.APP_URL }}"
+          APP_TIMEZONE="${{ secrets.APP_TIMEZONE || 'UTC' }}"
+          APP_SECRET="${{ secrets.APP_SECRET }}"
+
+          DB_HOST="${{ secrets.DB_HOST }}"
+          DB_PORT="${{ secrets.DB_PORT || '3306' }}"
+          DB_DATABASE="${{ secrets.DB_DATABASE }}"
+          DB_USERNAME="${{ secrets.DB_USERNAME }}"
+          DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+          DB_CHARSET=utf8mb4
+
+          PAYPAL_MODE="${{ secrets.PAYPAL_MODE || 'live' }}"
+          PAYPAL_CLIENT_ID="${{ secrets.PAYPAL_CLIENT_ID }}"
+          PAYPAL_CLIENT_SECRET="${{ secrets.PAYPAL_CLIENT_SECRET }}"
+          PAYPAL_WEBHOOK_ID="${{ secrets.PAYPAL_WEBHOOK_ID }}"
+          PAYPAL_CURRENCY="${{ secrets.PAYPAL_CURRENCY || 'USD' }}"
+
+          GITHUB_CLIENT_ID="${{ secrets.GITHUB_CLIENT_ID }}"
+          GITHUB_CLIENT_SECRET="${{ secrets.GITHUB_CLIENT_SECRET }}"
+          GITHUB_REDIRECT_URI="${{ secrets.APP_URL }}/auth/github/callback"
+
+          GOOGLE_CLIENT_ID="${{ secrets.GOOGLE_CLIENT_ID }}"
+          GOOGLE_CLIENT_SECRET="${{ secrets.GOOGLE_CLIENT_SECRET }}"
+          GOOGLE_REDIRECT_URI="${{ secrets.APP_URL }}/auth/google/callback"
+
+          FACEBOOK_CLIENT_ID="${{ secrets.FACEBOOK_CLIENT_ID }}"
+          FACEBOOK_CLIENT_SECRET="${{ secrets.FACEBOOK_CLIENT_SECRET }}"
+          FACEBOOK_REDIRECT_URI="${{ secrets.APP_URL }}/auth/facebook/callback"
+
+          AI_PROVIDER="${{ secrets.AI_PROVIDER || 'knowledge_base' }}"
+          AI_API_KEY="${{ secrets.AI_API_KEY }}"
+          AI_MODEL="${{ secrets.AI_MODEL || 'gpt-4o-mini' }}"
+
+          MAIL_HOST="${{ secrets.MAIL_HOST }}"
+          MAIL_PORT="${{ secrets.MAIL_PORT || '587' }}"
+          MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}"
+          MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"
+          MAIL_FROM_ADDRESS="${{ secrets.MAIL_FROM_ADDRESS || 'noreply@example.com' }}"
+          MAIL_FROM_NAME="${{ secrets.MAIL_FROM_NAME || 'ChatBot Creator Studio' }}"
+          EOF
+          chmod 600 .env
+
+      - name: Deploy to Shared Hosting via FTP/FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || 'htdocs/' }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftps' }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/tests/**
+            **/phpunit.xml
+            **/.env.example
+            **/make_ico.php
+
+  deploy-widget-cdn-pages:
+    name: Publish Widget CDN & CNAME to GitHub Pages
+    runs-on: ubuntu-latest
+    if: "${{ vars.ENABLE_PAGES_WIDGET_CDN == 'true' }}"
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout Code Repository
+        uses: actions/checkout@v4
+
+      - name: Prepare Static CDN Assets & CNAME
+        run: |
+          mkdir -p _site
+          cp -r public-assets/* _site/
+          if [ -n "${{ vars.PAGES_CUSTOM_DOMAIN }}" ]; then
+            echo "${{ vars.PAGES_CUSTOM_DOMAIN }}" > _site/CNAME
+          fi
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

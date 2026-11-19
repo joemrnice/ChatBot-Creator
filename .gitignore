@@ -1,0 +1,29 @@
+# Environment & Secrets
+.env
+.env.backup
+.env.local
+*.log
+
+# Composer & Dependencies
+/vendor/
+composer.phar
+
+# Application Storage & Private User Data
+/storage/logs/*.log
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/exports/*
+!/storage/exports/.gitkeep
+/storage/private/*
+!/storage/private/.gitkeep
+/storage/installed.lock
+
+# Operating System & IDE Artifacts
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-workspace
+*.swp

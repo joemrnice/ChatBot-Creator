@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /how-it-works
+Allow: /pricing
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /b/
+Disallow: /studio/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /storage/
